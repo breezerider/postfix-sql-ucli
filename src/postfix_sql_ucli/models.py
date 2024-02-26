@@ -1,11 +1,12 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Index
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
+
 class VirtualDomain(Base):
     """Table containing virtual domains"""
+
     __tablename__ = 'virtual_domains'
 
     id = Column(Integer, primary_key=True)
@@ -26,8 +27,10 @@ class VirtualDomain(Base):
         for key, value in iters.items():
             yield key, value
 
+
 class VirtualUser(Base):
     """Table containing virtual users per domain"""
+
     __tablename__ = 'virtual_users'
 
     id = Column(Integer, primary_key=True)
@@ -38,7 +41,10 @@ class VirtualUser(Base):
     domain = relationship('VirtualDomain', back_populates='users')
 
     def __repr__(self) -> str:
-        return f"VirtualUser(id={self.id!r}, domain_id={self.domain_id!r}, email={self.email!r}, password={self.password!r})"
+        return (
+            f"VirtualUser(id={self.id!r}, domain_id={self.domain_id!r}, "
+            f"email={self.email!r}, password={self.password!r})"
+        )
 
     def __iter__(self):
         iters = {
@@ -51,8 +57,10 @@ class VirtualUser(Base):
         for key, value in iters.items():
             yield key, value
 
+
 class VirtualAlias(Base):
     """Table containing virtual aliases per domain"""
+
     __tablename__ = 'virtual_aliases'
 
     id = Column(Integer, primary_key=True)
@@ -63,7 +71,10 @@ class VirtualAlias(Base):
     domain = relationship('VirtualDomain', back_populates='aliases')
 
     def __repr__(self) -> str:
-        return f"VirtualAlias(id={self.id!r}, domain_id={self.domain_id!r}, source={self.source!r}, destination={self.destination!r})"
+        return (
+            f"VirtualAlias(id={self.id!r}, domain_id={self.domain_id!r}, "
+            f"source={self.source!r}, destination={self.destination!r})"
+        )
 
     def __iter__(self):
         iters = {

@@ -1,17 +1,21 @@
 import getpass
-import passlib.hash
 import re
+
+import passlib.hash
 import yaml
 
 email_account_regexp = re.compile(r'^[a-zA-Z0-9._%+-]+$')
 domain_regexp = re.compile(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+
 
 def is_valid_email(email, domain_only=False):
     """Check if a string constitutes a valid email address
 
     :param email: string containing an email address
     :type email: str
-    :returns: True if string matches the valid email address regexp, False otherwise. If domain_only is set, then only the domain name is checked against the valid domain name regexp
+    :returns: True if string matches the valid email address regexp, False otherwise.
+              If domain_only is set, then only the domain name is checked against
+              the valid domain name regexp.
     :rtype: bool"""
 
     if '@' not in email:
@@ -24,14 +28,16 @@ def is_valid_email(email, domain_only=False):
     else:
         return (email_account_regexp.match(email_account) is not None) and is_valid_domain_name(domain_name)
 
+
 def is_valid_domain_name(domain_name):
     """Check if a string constitutes a valid domain name
 
     :param domain_name: string containing the domain name
     :type domain_name: str
-    :returns: True if string matches the valid domain name regexp, False otherwise
+    :returns: True if string matches the valid domain name regexp, False otherwise.
     :rtype: bool"""
     return domain_regexp.match(domain_name) is not None
+
 
 def doveadm_pw_hash(password, salt=None):
     """Encrypt a clear-text password string as doveadm password hash
@@ -42,12 +48,13 @@ def doveadm_pw_hash(password, salt=None):
     :rtype: str"""
     return passlib.hash.sha512_crypt.using(salt=salt, rounds=5000).hash(password)
 
+
 def get_password(max_count=-1):
     """New password prompt with confirmation
 
     :param max_count: maximum number of input attempts
     :type password: int
-    :returns: string containg the input password or None if number of input attempts have been exceeded
+    :returns: string containg the input password or None if number of input attempts have been exceeded.
     :rtype: str"""
     count = 0
     password_input = None
@@ -67,6 +74,7 @@ def get_password(max_count=-1):
         count += 1
 
     return password_input
+
 
 def load_database_config(config_file_path):
     """Load database configuration from a YAML file with following format:
@@ -89,9 +97,15 @@ def load_database_config(config_file_path):
     with open(config_file_path, 'r', encoding='utf-8') as config_file:
         config = yaml.safe_load(config_file)
 
-    if config is None or ('database' not in config) or any(x not in config["database"] for x in ['name', 'type']) or \
-       (not config["database"]["type"].startswith('sqlite') and any(x not in config["database"] for x in ['user', 'password', 'host', 'port'])):
+    if (
+        config is None
+        or ('database' not in config)
+        or any(x not in config["database"] for x in ['name', 'type'])
+        or (
+            not config["database"]["type"].startswith('sqlite')
+            and any(x not in config["database"] for x in ['user', 'password', 'host', 'port'])
+        )
+    ):
         raise ValueError("required object 'database' with all required fields not found")
 
     return config["database"]
-

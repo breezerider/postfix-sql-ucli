@@ -1,15 +1,12 @@
-
-from sqlalchemy import and_
-from sqlalchemy import insert
-from sqlalchemy import select
-from sqlalchemy import delete
+from sqlalchemy import and_, delete, insert, select
 from sqlalchemy.orm import Session
 
-from . import models
-from . import utils
+from . import models, utils
+
 
 def _asdicts(results):
     return [dict(entry) for entry in results]
+
 
 def reset_database(engine):
     """Reset the exisitng Postfix database
@@ -19,6 +16,7 @@ def reset_database(engine):
 
     models.Base.metadata.drop_all(engine)
     models.Base.metadata.create_all(engine)
+
 
 def add_domain(engine, domain_name):
     """Add a new virtual domain
@@ -42,12 +40,13 @@ def add_domain(engine, domain_name):
             insert(models.VirtualDomain).returning(models.VirtualDomain),
             [
                 {"name": domain_name},
-            ]
+            ],
         ).all()
 
         session.commit()  # write changes to the database
 
         return _asdicts(domains), True
+
 
 def search_domains(engine, domain_name_pattern, exact=False):
     """Search virtual domains
@@ -56,7 +55,8 @@ def search_domains(engine, domain_name_pattern, exact=False):
     :type engine: object
     :param domain_name_pattern: string containing the sought-for domain name pattern
     :type domain_name_pattern: str
-    :param exact: If True pattern value must match exactly, otherwise pattern matching is perfromed starting from beginning of the string
+    :param exact: If True pattern value must match exactly, otherwise match pattern
+                  from beginning of the string
     :type exact: bool
     :returns: list of entries in the database
     :rtype: list"""
@@ -64,11 +64,16 @@ def search_domains(engine, domain_name_pattern, exact=False):
     # search domains
     with Session(engine) as session:
         if exact:
-            results = session.scalars(select(models.VirtualDomain).where(models.VirtualDomain.name == domain_name_pattern)).all()
+            results = session.scalars(
+                select(models.VirtualDomain).where(models.VirtualDomain.name == domain_name_pattern)
+            ).all()
         else:
-            results = session.scalars(select(models.VirtualDomain).where(models.VirtualDomain.name.startswith(domain_name_pattern))).all()
+            results = session.scalars(
+                select(models.VirtualDomain).where(models.VirtualDomain.name.startswith(domain_name_pattern))
+            ).all()
 
         return _asdicts(results)
+
 
 def add_user(engine, user_email, user_password):
     """Add a new virtual user
@@ -105,12 +110,13 @@ def add_user(engine, user_email, user_password):
             insert(models.VirtualUser).returning(models.VirtualUser),
             [
                 {"domain_id": domains[0]["id"], "email": user_email, "password": user_password_hash},
-            ]
+            ],
         )
 
         session.commit()  # write changes to the database
 
         return _asdicts(users), True
+
 
 def search_users(engine, user_email_pattern, exact=False):
     """Search virtual users
@@ -119,7 +125,8 @@ def search_users(engine, user_email_pattern, exact=False):
     :type engine: object
     :param user_email_pattern: string containing the sought-for user email address pattern
     :type user_email_pattern: str
-    :param exact: If True pattern value must match exactly, otherwise pattern matching is perfromed starting from beginning of the string
+    :param exact: If True pattern value must match exactly, otherwise match pattern
+                  from beginning of the string
     :type exact: bool
     :returns: list of entries in the database
     :rtype: list"""
@@ -127,11 +134,16 @@ def search_users(engine, user_email_pattern, exact=False):
     # search users
     with Session(engine) as session:
         if exact:
-            results = session.scalars(select(models.VirtualUser).where(models.VirtualUser.email == user_email_pattern)).all()
+            results = session.scalars(
+                select(models.VirtualUser).where(models.VirtualUser.email == user_email_pattern)
+            ).all()
         else:
-            results = session.scalars(select(models.VirtualUser).where(models.VirtualUser.email.startswith(user_email_pattern))).all()
+            results = session.scalars(
+                select(models.VirtualUser).where(models.VirtualUser.email.startswith(user_email_pattern))
+            ).all()
 
         return _asdicts(results)
+
 
 def delete_user(engine, user_email_pattern):
     """Delete virtual user
@@ -145,15 +157,18 @@ def delete_user(engine, user_email_pattern):
 
     # delete virtual user
     with Session(engine) as session:
-        results = session.scalars(delete(models.VirtualUser)
-                                  .where(models.VirtualUser.email == user_email_pattern)
-                                  .returning(models.VirtualUser)).all()
+        results = session.scalars(
+            delete(models.VirtualUser)
+            .where(models.VirtualUser.email == user_email_pattern)
+            .returning(models.VirtualUser)
+        ).all()
 
         results = _asdicts(results)
 
         session.commit()  # write changes to the database
 
         return results
+
 
 def add_alias(engine, source_email, destination_email):
     """Add a new virtual alias
@@ -187,12 +202,13 @@ def add_alias(engine, source_email, destination_email):
             insert(models.VirtualAlias).returning(models.VirtualAlias),
             [
                 {"domain_id": domains[0]["id"], "source": source_email, "destination": destination_email},
-            ]
+            ],
         )
 
         session.commit()  # write changes to the database
 
         return _asdicts(aliases), True
+
 
 def search_aliases(engine, source_email_pattern, destination_email_pattern, exact=False):
     """Search virtual users
@@ -203,7 +219,8 @@ def search_aliases(engine, source_email_pattern, destination_email_pattern, exac
     :type source_email_pattern: str
     :param destination_email_pattern: string containing the destination email address pattern
     :type destination_email_pattern: str
-    :param exact: If True pattern value must match exactly, otherwise pattern matching is perfromed starting from beginning of the string
+    :param exact: If True pattern value must match exactly, otherwise match pattern
+                  from beginning of the string
     :type exact: bool
     :returns: list of entries in the database
     :rtype: list"""
@@ -211,15 +228,26 @@ def search_aliases(engine, source_email_pattern, destination_email_pattern, exac
     # search aliases
     with Session(engine) as session:
         if exact:
-            results = session.scalars(select(models.VirtualAlias).where(
-                and_(models.VirtualAlias.source == source_email_pattern,
-                     models.VirtualAlias.destination == destination_email_pattern))).all()
+            results = session.scalars(
+                select(models.VirtualAlias).where(
+                    and_(
+                        models.VirtualAlias.source == source_email_pattern,
+                        models.VirtualAlias.destination == destination_email_pattern,
+                    )
+                )
+            ).all()
         else:
-            results = session.scalars(select(models.VirtualAlias).where(
-                and_(models.VirtualAlias.source.startswith(source_email_pattern),
-                     models.VirtualAlias.destination.startswith(destination_email_pattern)))).all()
+            results = session.scalars(
+                select(models.VirtualAlias).where(
+                    and_(
+                        models.VirtualAlias.source.startswith(source_email_pattern),
+                        models.VirtualAlias.destination.startswith(destination_email_pattern),
+                    )
+                )
+            ).all()
 
         return _asdicts(results)
+
 
 def delete_aliases(engine, source_email_pattern, destination_email_pattern):
     """Delete virtual aliases
@@ -235,10 +263,16 @@ def delete_aliases(engine, source_email_pattern, destination_email_pattern):
 
     # delete aliases
     with Session(engine) as session:
-        results = session.scalars(delete(models.VirtualAlias).where(
-            and_(models.VirtualAlias.source.startswith(source_email_pattern),
-                 models.VirtualAlias.destination.startswith(destination_email_pattern)))
-            .returning(models.VirtualAlias)).all()
+        results = session.scalars(
+            delete(models.VirtualAlias)
+            .where(
+                and_(
+                    models.VirtualAlias.source.startswith(source_email_pattern),
+                    models.VirtualAlias.destination.startswith(destination_email_pattern),
+                )
+            )
+            .returning(models.VirtualAlias)
+        ).all()
 
         results = _asdicts(results)
 

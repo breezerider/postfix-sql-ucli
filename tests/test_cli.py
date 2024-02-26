@@ -1,13 +1,12 @@
-import pytest
-from click.testing import CliRunner
 import unittest.mock
 
-from postfix_sql_ucli import __version__
-from postfix_sql_ucli import cli
-from postfix_sql_ucli import operations
+import pytest
+from click.testing import CliRunner
+
+from postfix_sql_ucli import __version__, cli, operations
 
 
-@pytest.fixture
+@pytest.fixture()
 def runner():
     return CliRunner()
 
@@ -67,7 +66,9 @@ def test_cli_add_domain(runner, monkeypatch):
     result = runner.invoke(cli.main, ['add-domain', '--config', 'tests/postfix-sql-ucli.yml', 'other.org'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Adding virtual domain: other.org\nAborted, found exisitng virtual domain(s): domains'
+    assert (
+        result.output.strip() == 'Adding virtual domain: other.org\nAborted, found exisitng virtual domain(s): domains'
+    )
     mock_add_domain.assert_called_with("engine", "other.org")
 
     result = runner.invoke(cli.main, ['add-domain', '--config', 'tests/postfix-sql-ucli.yml'])
@@ -137,14 +138,22 @@ def test_cli_add_user(runner, monkeypatch):
     result = runner.invoke(cli.main, ['add-user', '--config', 'tests/postfix-sql-ucli.yml', 'user@other.org'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Adding virtual user: user@other.org\nAborted, found exisitng virtual user(s): user@other.org'
+    assert (
+        result.output.strip()
+        == """Adding virtual user: user@other.org
+Aborted, found exisitng virtual user(s): user@other.org"""
+    )
     mock_add_user.assert_called_with("engine", "user@other.org", "")
 
     mock_add_user.return_value = (None, False)
     result = runner.invoke(cli.main, ['add-user', '--config', 'tests/postfix-sql-ucli.yml', 'user@unknown.org'])
     assert result.exit_code == 1
     assert result.exception
-    assert result.output.strip() == 'Adding virtual user: user@unknown.org\nadd-user operation failed: domain unknown.org can not be used'
+    assert (
+        result.output.strip()
+        == """Adding virtual user: user@unknown.org
+add-user operation failed: domain unknown.org can not be used"""
+    )
     mock_add_user.assert_called_with("engine", "user@unknown.org", "")
 
     result = runner.invoke(cli.main, ['add-user', '--config', 'tests/postfix-sql-ucli.yml'])
@@ -207,7 +216,11 @@ def test_cli_delete_user(runner, monkeypatch):
     result = runner.invoke(cli.main, ['delete-user', '--config', 'tests/postfix-sql-ucli.yml', 'user@test.com'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Deleting virtual user account: user@test.com\nDeleted virtual user account(s): user@test.com'
+    assert (
+        result.output.strip()
+        == """Deleting virtual user account: user@test.com
+Deleted virtual user account(s): user@test.com"""
+    )
     mock_delete_user.assert_called_with("engine", "user@test.com")
 
     mock_delete_user.return_value = []
@@ -248,26 +261,42 @@ def test_cli_add_alias(runner, monkeypatch):
     result = runner.invoke(cli.main, ['add-alias', '--config', 'tests/postfix-sql-ucli.yml', '@other.org', '@test.com'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Adding virtual alias: @other.org -> @test.com\nAborted, found exisitng virtual alias(es): aliases'
+    assert (
+        result.output.strip()
+        == """Adding virtual alias: @other.org -> @test.com
+Aborted, found exisitng virtual alias(es): aliases"""
+    )
     mock_add_alias.assert_called_with("engine", '@other.org', '@test.com')
 
     mock_add_alias.return_value = (None, False)
-    result = runner.invoke(cli.main, ['add-alias', '--config', 'tests/postfix-sql-ucli.yml', '@unknown.org', '@anywhere.org'])
+    result = runner.invoke(
+        cli.main, ['add-alias', '--config', 'tests/postfix-sql-ucli.yml', '@unknown.org', '@anywhere.org']
+    )
     assert result.exit_code == 1
     assert result.exception
-    assert result.output.strip() == 'Adding virtual alias: @unknown.org -> @anywhere.org\nadd-alias operation failed: domain unknown.org can not be used'
+    assert (
+        result.output.strip()
+        == """Adding virtual alias: @unknown.org -> @anywhere.org
+add-alias operation failed: domain unknown.org can not be used"""
+    )
     mock_add_alias.assert_called_with("engine", '@unknown.org', '@anywhere.org')
 
     for args in [[], ['@test.com']]:
         result = runner.invoke(cli.main, ['add-alias', '--config', 'tests/postfix-sql-ucli.yml', *args])
         assert result.exit_code == 1
         assert result.exception
-        assert result.output.strip() == 'add-alias operation requires exactly two arguments: source and destination email addresses'
+        assert (
+            result.output.strip() == """add-alias operation requires exactly two arguments: """
+            """source and destination email addresses"""
+        )
 
     result = runner.invoke(cli.main, ['add-alias', '--config', 'tests/postfix-sql-ucli.yml', 'invalid', 'elsewhere'])
     assert result.exit_code == 1
     assert result.exception
-    assert result.output.strip() == "add-alias operation failed: invalid email address in alias 'invalid' -> 'elsewhere'"
+    assert (
+        result.output.strip() == """add-alias operation failed: """
+        """invalid email address in alias 'invalid' -> 'elsewhere'"""
+    )
 
 
 def test_cli_search_aliases(runner, monkeypatch):
@@ -290,14 +319,21 @@ def test_cli_search_aliases(runner, monkeypatch):
     result = runner.invoke(cli.main, ['search-aliases', '--config', 'tests/postfix-sql-ucli.yml', 'source3'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Searching virtual aliases for source3 -> \nFound virtual alias(es): source3 -> destination3'
+    assert (
+        result.output.strip() == "Searching virtual aliases for source3 -> \n"
+        "Found virtual alias(es): source3 -> destination3"
+    )
     mock_search_aliases.assert_called_with("engine", "source3", "")
 
     mock_search_aliases.return_value = ["source3 -> destination3"]
     result = runner.invoke(cli.main, ['search-aliases', '--config', 'tests/postfix-sql-ucli.yml', '', 'destination3'])
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Searching virtual aliases for  -> destination3\nFound virtual alias(es): source3 -> destination3'
+    assert (
+        result.output.strip()
+        == """Searching virtual aliases for  -> destination3
+Found virtual alias(es): source3 -> destination3"""
+    )
     mock_search_aliases.assert_called_with("engine", "", "destination3")
 
     mock_search_aliases.return_value = []
@@ -307,10 +343,15 @@ def test_cli_search_aliases(runner, monkeypatch):
     assert result.output.strip() == 'Searching virtual aliases for non-existent -> \nNo virtual aliases found'
     mock_search_aliases.assert_called_with("engine", "non-existent", "")
 
-    result = runner.invoke(cli.main, ['search-aliases', '--config', 'tests/postfix-sql-ucli.yml', 'too', 'many','args'])
+    result = runner.invoke(
+        cli.main, ['search-aliases', '--config', 'tests/postfix-sql-ucli.yml', 'too', 'many', 'args']
+    )
     assert result.exit_code == 1
     assert result.exception
-    assert result.output.strip() == 'search-aliases operation expects at most two arguments: source and destination email patterns'
+    assert (
+        result.output.strip() == """search-aliases operation expects at most two arguments: """
+        """source and destination email patterns"""
+    )
 
 
 def test_cli_delete_aliases(runner, monkeypatch):
@@ -323,25 +364,38 @@ def test_cli_delete_aliases(runner, monkeypatch):
     monkeypatch.setattr(operations, 'delete_aliases', mock_delete_alias)
 
     mock_delete_alias.return_value = ["aliases"]
-    result = runner.invoke(cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', '@test.com', '@other.org'])
+    result = runner.invoke(
+        cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', '@test.com', '@other.org']
+    )
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Deleting virtual alias(es): @test.com -> @other.org\nDeleted virtual alias(es): aliases'
+    assert (
+        result.output.strip()
+        == """Deleting virtual alias(es): @test.com -> @other.org
+Deleted virtual alias(es): aliases"""
+    )
     mock_delete_alias.assert_called_with("engine", '@test.com', '@other.org')
 
-
     mock_delete_alias.return_value = []
-    result = runner.invoke(cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', '@unknown.org', '@anywhere.org'])
+    result = runner.invoke(
+        cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', '@unknown.org', '@anywhere.org']
+    )
     assert result.exit_code == 0
     assert not result.exception
-    assert result.output.strip() == 'Deleting virtual alias(es): @unknown.org -> @anywhere.org\nNo virtual aliases deleted'
+    assert (
+        result.output.strip() == 'Deleting virtual alias(es): @unknown.org -> @anywhere.org\nNo virtual aliases deleted'
+    )
     mock_delete_alias.assert_called_with("engine", '@unknown.org', '@anywhere.org')
 
-
-    result = runner.invoke(cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', 'too', 'many','args'])
+    result = runner.invoke(
+        cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', 'too', 'many', 'args']
+    )
     assert result.exit_code == 1
     assert result.exception
-    assert result.output.strip() == 'delete-aliases operation expects at most two arguments: source and destination email patterns'
+    assert (
+        result.output.strip() == """delete-aliases operation expects at most two arguments: """
+        """source and destination email patterns"""
+    )
 
     for args in [[], ['@test.com'], ['', '@other.org']]:
         if len(args) == 0:
@@ -351,8 +405,14 @@ def test_cli_delete_aliases(runner, monkeypatch):
         else:
             source, destination = *args, ''
 
-        result = runner.invoke(cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', source, destination])
+        result = runner.invoke(
+            cli.main, ['delete-aliases', '--config', 'tests/postfix-sql-ucli.yml', source, destination]
+        )
         mock_delete_alias.return_value = []
         assert result.exit_code == 0
         assert not result.exception
-        assert result.output.strip() == f'Deleting virtual alias(es): {source} -> {destination}\nNo virtual aliases deleted'
+        assert (
+            result.output.strip()
+            == f"""Deleting virtual alias(es): {source} -> {destination}
+No virtual aliases deleted"""
+        )

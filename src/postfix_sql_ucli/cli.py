@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import click
-from sqlalchemy import create_engine
 import sys
 
-from . import __version__
-from . import models
-from . import operations
-from . import utils
+import click
+from sqlalchemy import create_engine
+
+from . import __version__, operations, utils
 
 
 def print_version(ctx, param, value):
@@ -18,10 +16,33 @@ def print_version(ctx, param, value):
 
 
 @click.command()
-@click.argument("operation", type=click.Choice(["reset", "add-domain", "search-domains", "delete-domain", "add-user", "search-users", "delete-user", "add-alias", "search-aliases", "delete-aliases"]))
+@click.argument(
+    "operation",
+    type=click.Choice([
+        "reset",
+        "add-domain",
+        "search-domains",
+        "delete-domain",
+        "add-user",
+        "search-users",
+        "delete-user",
+        "add-alias",
+        "search-aliases",
+        "delete-aliases",
+    ]),
+)
 @click.option("--force", is_flag=True, help="Force reset without confirmation")
-@click.option("--config", type=click.Path(exists=True), help="Path to configuration file", default='postfix-sql-ucli.yml')
-@click.option('--version', is_flag=True, help="Print tool version and exit", callback=print_version, expose_value=False, is_eager=True)
+@click.option(
+    "--config", type=click.Path(exists=True), help="Path to configuration file", default='postfix-sql-ucli.yml'
+)
+@click.option(
+    '--version',
+    is_flag=True,
+    help="Print tool version and exit",
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+)
 @click.option("--verbose", is_flag=True, help="Verbose output")
 @click.argument("arguments", nargs=-1)
 def main(operation, force, config, verbose, arguments):
@@ -80,7 +101,8 @@ def main(operation, force, config, verbose, arguments):
 
     * `search-aliases` operation expects at most two arguments: source and destination email patterns, prints out virtual aliases with emails following the pattern (or all entries in case no pattern is provided) from ``virtual_aliases`` table to standard output.
 
-    * `delete-aliases` operation expects at most two arguments: source and destination email patterns, and deletes virtual alias entries with emails following the pattern (or all entries in case no pattern is provided) from ``virtual_aliases`` table and prints out the deleted virtual alias entries to standard output."""
+    * `delete-aliases` operation expects at most two arguments: source and destination email patterns, and deletes virtual alias entries with emails following the pattern (or all entries in case no pattern is provided) from ``virtual_aliases`` table and prints out the deleted virtual alias entries to standard output.
+    """  # noqa: E501, B950
 
     # Load database configuration from YAML file
     try:
@@ -123,7 +145,7 @@ def main(operation, force, config, verbose, arguments):
         if len(arguments) != 1:
             click.echo(f"{operation} operation requires exactly one argument: domain name")
             sys.exit(1)
-        domain_name, = arguments
+        (domain_name,) = arguments
         if not utils.is_valid_domain_name(domain_name):
             click.echo(f"{operation} operation failed: invalid domain name '{domain_name}'")
             sys.exit(1)
@@ -135,7 +157,7 @@ def main(operation, force, config, verbose, arguments):
             else:
                 click.echo(f"Aborted, found exisitng virtual domain(s): {domains}")
         else:
-            #delete_domain(engine, domain_name)
+            # delete_domain(engine, domain_name)
             click.echo("delete_domain operation is not implemented")
             pass
     elif operation == "search-domains":
@@ -143,20 +165,20 @@ def main(operation, force, config, verbose, arguments):
             click.echo("search-domains operation expects at most one argument: domain name pattern")
             sys.exit(1)
         elif len(arguments) == 1:
-            domain_name_pattern, = arguments
+            (domain_name_pattern,) = arguments
         else:
             domain_name_pattern = ''
         click.echo(f"Searching virtual domain names for {domain_name_pattern}")
         results = operations.search_domains(engine, domain_name_pattern)
         if len(results):
-            click.echo(f"Found virtual domain(s): {', '.join([str(x) for x in results])}")
+            click.echo("Found virtual domain(s): " + ', '.join([str(x) for x in results]))
         else:
-            click.echo(f"No virtual domains found")
+            click.echo("No virtual domains found")
     elif operation in ["add-user", "delete-user"]:
         if len(arguments) != 1:
             click.echo(f"{operation} operation requires exactly one argument: user email")
             sys.exit(1)
-        user_email, = arguments
+        (user_email,) = arguments
         if not utils.is_valid_email(user_email):
             click.echo(f"{operation} operation failed: invalid email address '{user_email}'")
             sys.exit(1)
@@ -182,23 +204,23 @@ def main(operation, force, config, verbose, arguments):
             click.echo(f"Deleting virtual user account: {user_email}")
             results = operations.delete_user(engine, user_email)
             if len(results):
-                click.echo(f"Deleted virtual user account(s): {', '.join([str(x) for x in results])}")
+                click.echo("Deleted virtual user account(s): " + ', '.join([str(x) for x in results]))
             else:
-                click.echo(f"No virtual user accounts deleted")
+                click.echo("No virtual user accounts deleted")
     elif operation == "search-users":
         if len(arguments) > 1:
             click.echo("search-users operation expects at most one argument: user email pattern")
             sys.exit(1)
         elif len(arguments) == 1:
-            user_email_pattern, = arguments
+            (user_email_pattern,) = arguments
         else:
             user_email_pattern = ''
         click.echo(f"Searching virtual user accounts for {user_email_pattern}")
         results = operations.search_users(engine, user_email_pattern)
         if len(results):
-            click.echo(f"Found virtual user account(s): {', '.join([str(x) for x in results])}")
+            click.echo("Found virtual user account(s): " + ', '.join([str(x) for x in results]))
         else:
-            click.echo(f"No virtual user accounts found")
+            click.echo("No virtual user accounts found")
     elif operation == "add-alias":
         if len(arguments) != 2:
             click.echo("add-alias operation requires exactly two arguments: source and destination email addresses")
@@ -234,20 +256,21 @@ def main(operation, force, config, verbose, arguments):
             click.echo(f"Deleting virtual alias(es): {source_email_pattern} -> {destination_email_pattern}")
             results = operations.delete_aliases(engine, source_email_pattern, destination_email_pattern)
             if len(results):
-                click.echo(f"Deleted virtual alias(es): {', '.join([str(x) for x in results])}")
+                click.echo("Deleted virtual alias(es): " + ', '.join([str(x) for x in results]))
             else:
-                click.echo(f"No virtual aliases deleted")
+                click.echo("No virtual aliases deleted")
         else:
             click.echo(f"Searching virtual aliases for {source_email_pattern} -> {destination_email_pattern}")
             results = operations.search_aliases(engine, source_email_pattern, destination_email_pattern)
             if len(results):
-                click.echo(f"Found virtual alias(es): {', '.join([str(x) for x in results])}")
+                click.echo("Found virtual alias(es): " + ', '.join([str(x) for x in results]))
             else:
-                click.echo(f"No virtual aliases found")
+                click.echo("No virtual aliases found")
     else:
         # if an operation is in click.Choice above but is not implemented here
         click.echo("unexpected operation, this should never happen")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

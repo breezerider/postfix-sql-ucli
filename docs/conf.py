@@ -21,7 +21,7 @@ year = '2024'
 author = 'Oleksandr Ostrenko'
 copyright = '{0}, {1}'.format(year, author)
 version = 'develop'
-#version = release = '0.1.0'
+# version = release = '0.1.0'
 
 pygments_style = 'trac'
 templates_path = ['.']
@@ -43,9 +43,9 @@ html_sidebars = {
 }
 html_short_title = '%s-%s' % (project, version)
 
-napoleon_google_docstring = False   # Turn off googledoc strings
-napoleon_numpy_docstring = True     # Turn on numpydoc strings
-napoleon_use_ivar = True            # For maths symbols
-napoleon_use_rtype = False          # Inline return type
-napoleon_use_param = False          # Single params role
-napoleon_use_keyword = False        # Single keywors role
+napoleon_google_docstring = False  # Turn off googledoc strings
+napoleon_numpy_docstring = True  # Turn on numpydoc strings
+napoleon_use_ivar = True  # For maths symbols
+napoleon_use_rtype = False  # Inline return type
+napoleon_use_param = False  # Single params role
+napoleon_use_keyword = False  # Single keywors role

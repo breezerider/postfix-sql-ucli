@@ -1,55 +1,70 @@
 import getpass
 import unittest.mock as mock
-import pytest
 
+import pytest
 
 from postfix_sql_ucli import utils
 
 
-@pytest.mark.parametrize("email", [
-    "someone@somewhere.com",
-    "anybody@elsewhere.com",
-    "a@s.co",
-])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "someone@somewhere.com",
+        "anybody@elsewhere.com",
+        "a@s.co",
+    ],
+)
 def test_is_valid_email_valid(email):
     assert utils.is_valid_email(email)
 
 
-@pytest.mark.parametrize("email", [
-    "",
-    "@somewhere.com",
-    "elsewhere.com",
-    "chip&dale@somewhere.com",
-    "chip@somewhere",
-])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "",
+        "@somewhere.com",
+        "elsewhere.com",
+        "chip&dale@somewhere.com",
+        "chip@somewhere",
+    ],
+)
 def test_is_valid_email_invalid(email):
     assert not utils.is_valid_email(email)
 
 
-@pytest.mark.parametrize("email", [
-    "someone@somewhere.com",
-    "@elsewhere.com",
-    "@s.co",
-])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "someone@somewhere.com",
+        "@elsewhere.com",
+        "@s.co",
+    ],
+)
 def test_is_valid_email_valid_domain_only(email):
     assert utils.is_valid_email(email, domain_only=True)
 
 
-@pytest.mark.parametrize("domain", [
-    "somewhere.com",
-    "elsewhere.com",
-    "a.co",
-])
+@pytest.mark.parametrize(
+    "domain",
+    [
+        "somewhere.com",
+        "elsewhere.com",
+        "a.co",
+    ],
+)
 def test_is_valid_domain_name_valid(domain):
     assert utils.is_valid_domain_name(domain)
 
 
-@pytest.mark.parametrize("domain", [
-    "",
-    "&somewhere.com",
-    "somewhere",
-    "a.b",
-])
+@pytest.mark.parametrize(
+    "domain",
+    [
+        "",
+        "&somewhere.com",
+        "somewhere",
+        "a.b",
+    ],
+)
 def test_is_valid_domain_name_invalid(domain):
     assert not utils.is_valid_domain_name(domain)
 
@@ -76,6 +91,7 @@ def test_get_password(monkeypatch):
         output = password_output[mock_getpass.counter]
         mock_getpass.counter += 1
         return output
+
     mock_getpass.counter = 0
 
     expected = "test"
@@ -88,10 +104,13 @@ def test_get_password(monkeypatch):
     assert actual == expected
 
 
-@pytest.mark.parametrize("data", [
-    "",
-    "database:\n  type: postgresql\n  name: test",
-])
+@pytest.mark.parametrize(
+    "data",
+    [
+        "",
+        "database:\n  type: postgresql\n  name: test",
+    ],
+)
 def test_load_database_config_invalid(data):
 
     with mock.patch("builtins.open", mock.mock_open(read_data=data)):

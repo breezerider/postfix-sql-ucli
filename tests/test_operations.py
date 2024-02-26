@@ -1,14 +1,9 @@
-import pytest
-from sqlalchemy import create_engine
 import unittest
 import unittest.mock
 
-# from unittest.mock import Mock
-# import unittest.mock import patch
+from sqlalchemy import create_engine
 
-from postfix_sql_ucli import models
-from postfix_sql_ucli import operations
-from postfix_sql_ucli import utils
+from postfix_sql_ucli import models, operations
 
 
 def test_reset_database(monkeypatch):
@@ -31,10 +26,8 @@ class TestOperation(unittest.TestCase):
         self.engine = create_engine('sqlite:///:memory:')
         models.Base.metadata.create_all(self.engine)
 
-
     def tearDown(self):
         models.Base.metadata.drop_all(self.engine)
-
 
     def test_add_domain(self):
         operations.reset_database(self.engine)
@@ -50,7 +43,6 @@ class TestOperation(unittest.TestCase):
 
         self.assertEqual([{"id": 1, "name": domain}], domains)
         self.assertEqual(False, added)
-
 
     def test_search_domains(self):
         operations.reset_database(self.engine)
@@ -83,7 +75,6 @@ class TestOperation(unittest.TestCase):
 
             self.assertEqual(expected, domains)
 
-
     @unittest.mock.patch('postfix_sql_ucli.utils.doveadm_pw_hash')
     def test_add_user(self, mock_doveadm_pw_hash):
         operations.reset_database(self.engine)
@@ -109,7 +100,6 @@ class TestOperation(unittest.TestCase):
 
         self.assertEqual(None, users)
         self.assertEqual(False, added)
-
 
     @unittest.mock.patch('postfix_sql_ucli.utils.doveadm_pw_hash')
     def test_search_users(self, mock_doveadm_pw_hash):
@@ -152,7 +142,6 @@ class TestOperation(unittest.TestCase):
 
             self.assertEqual(expected, users)
 
-
     @unittest.mock.patch('postfix_sql_ucli.utils.doveadm_pw_hash')
     def test_delete_user(self, mock_doveadm_pw_hash):
         operations.reset_database(self.engine)
@@ -181,7 +170,6 @@ class TestOperation(unittest.TestCase):
         users = operations.search_users(self.engine, query)
         self.assertEqual(expected, users)
 
-
     def test_add_alias(self):
         operations.reset_database(self.engine)
 
@@ -207,7 +195,6 @@ class TestOperation(unittest.TestCase):
         self.assertEqual(None, aliases)
         self.assertEqual(False, added)
 
-
     def test_search_aliases(self):
         operations.reset_database(self.engine)
 
@@ -220,16 +207,23 @@ class TestOperation(unittest.TestCase):
 
         aliases = operations.search_aliases(self.engine, source_email, "")
 
-        self.assertEqual([{"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"}, {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"}], aliases)
+        self.assertEqual(
+            [
+                {"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"},
+                {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"},
+            ],
+            aliases,
+        )
 
         aliases = operations.search_aliases(self.engine, "", "destination2@other.org")
 
-        self.assertEqual([{"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"}], aliases)
+        self.assertEqual(
+            [{"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"}], aliases
+        )
 
         aliases = operations.search_aliases(self.engine, "source@other.org", "")
 
         self.assertEqual([], aliases)
-
 
     def test_delete_aliases(self):
         operations.reset_database(self.engine)
@@ -242,7 +236,13 @@ class TestOperation(unittest.TestCase):
         operations.add_alias(self.engine, source_email, "destination2@other.org")
 
         aliases = operations.delete_aliases(self.engine, source_email, "")
-        self.assertEqual([{"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"}, {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"}], aliases)
+        self.assertEqual(
+            [
+                {"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"},
+                {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"},
+            ],
+            aliases,
+        )
 
         operations.add_alias(self.engine, source_email, "destination1@other.org")
         operations.add_alias(self.engine, source_email, "destination2@other.org")
@@ -250,7 +250,13 @@ class TestOperation(unittest.TestCase):
 
         aliases = operations.delete_aliases(self.engine, "", "%@other.org")
 
-        self.assertEqual([{"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"}, {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"}], aliases)
+        self.assertEqual(
+            [
+                {"id": 1, "domain_id": 1, "source": source_email, "destination": "destination1@other.org"},
+                {"id": 2, "domain_id": 1, "source": source_email, "destination": "destination2@other.org"},
+            ],
+            aliases,
+        )
 
         aliases = operations.delete_aliases(self.engine, "", "destination3@other.org")
 
@@ -258,7 +264,9 @@ class TestOperation(unittest.TestCase):
 
         aliases = operations.delete_aliases(self.engine, "", "destination3@another.org")
 
-        self.assertEqual([{"id": 3, "domain_id": 1, "source": source_email, "destination": "destination3@another.org"}], aliases)
+        self.assertEqual(
+            [{"id": 3, "domain_id": 1, "source": source_email, "destination": "destination3@another.org"}], aliases
+        )
 
         aliases = operations.search_aliases(self.engine, "", "")
 
