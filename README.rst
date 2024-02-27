@@ -7,16 +7,20 @@ Overview
 .. list-table::
     :stub-columns: 1
 
-    * - docs
+    * - docs (TODO)
       - |docs|
-    * - tests
+
+    * - build
       - | |github-actions|
         | |codecov|
+
 ..     * - package
 ..       - | |license| |version| |wheel| |supported-versions|
 ..         | |commits-since|
+
 .. |docs| image:: https://readthedocs.org/projects/postfix-sql-ucli/badge/?style=flat
-    :target: https://postfix-sql-ucli.readthedocs.io/
+    :target: https://github.com/breezerider/postfix-sql-ucli
+..    :target: https://postfix-sql-ucli.readthedocs.io/
     :alt: Documentation Status
 
 .. |github-actions| image:: https://github.com/breezerider/postfix-sql-ucli/actions/workflows/github-actions.yml/badge.svg
@@ -80,7 +84,7 @@ Documentation
 =============
 
 
-https://postfix-sql-ucli.readthedocs.io/
+TODO _https://postfix-sql-ucli.readthedocs.io/_
 
 
 License

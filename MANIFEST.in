@@ -1,6 +1,7 @@
 graft docs
 graft src
 graft tests
+prune ci
 
 include .bumpversion.cfg
 include .cookiecutterrc
@@ -17,7 +18,5 @@ include CHANGELOG.rst
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
-
-include src/postfix_sql_ucli/*.py
 
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
