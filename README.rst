@@ -7,20 +7,18 @@ Overview
 .. list-table::
     :stub-columns: 1
 
-    * - docs (TODO)
+    * - docs
       - |docs|
 
     * - build
-      - | |github-actions|
-        | |codecov|
+      - |github-actions| |codecov|
 
 ..     * - package
 ..       - | |license| |version| |wheel| |supported-versions|
 ..         | |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/postfix-sql-ucli/badge/?style=flat
-    :target: https://github.com/breezerider/postfix-sql-ucli
-..    :target: https://postfix-sql-ucli.readthedocs.io/
+    :target: https://postfix-sql-ucli.readthedocs.io/
     :alt: Documentation Status
 
 .. |github-actions| image:: https://github.com/breezerider/postfix-sql-ucli/actions/workflows/github-actions.yml/badge.svg
@@ -71,7 +69,7 @@ It depends on other common packages:
 Installation
 ============
 
-Get latest released version fo `PyPI <https://pypi.org/>`_::
+Get latest released version from `PyPI <https://pypi.org/>`_::
 
     pip install postfix-sql-ucli
 
@@ -84,19 +82,19 @@ Documentation
 =============
 
 
-TODO _https://postfix-sql-ucli.readthedocs.io/_
+https://postfix-sql-ucli.readthedocs.io/
 
 
 License
 =======
 
-- Source code: `BSD-3-Clause <https://choosealicense.com/licenses/bsd-3-clause/>`_ unless noted otherwise in individual files/directories
+- Source code: `BSD-3-Clause <https://choosealicense.com/licenses/bsd-3-clause/>`_ license unless noted otherwise in individual files/directories
 - Documentation: `Creative Commons Attribution-ShareAlike 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`_ license
 
 
 Development
 ===========
 
-To run all the tests run::
+To run all the tests issue this command in a terminal::
 
     tox
