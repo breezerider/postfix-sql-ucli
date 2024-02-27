@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.1.0 (TBD)
-------------------
+Unreleased
+-----------
 
 * Initial release on PyPI.

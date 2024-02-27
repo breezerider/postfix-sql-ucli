@@ -13,9 +13,9 @@ Overview
     * - build
       - |github-actions| |codecov|
 
-..     * - package
-..       - | |license| |version| |wheel| |supported-versions|
-..         | |commits-since|
+    * - package
+      - | |license| |version| |wheel| |supported-versions|
+        | |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/postfix-sql-ucli/badge/?style=flat
     :target: https://postfix-sql-ucli.readthedocs.io/
@@ -29,25 +29,25 @@ Overview
     :alt: Coverage Status
     :target: https://app.codecov.io/github/breezerider/postfix-sql-ucli
 
-.. .. |license| image:: https://img.shields.io/badge/license-BSD-green?style=flat
-..     :alt: PyPI Package license
-..     :target: https://test.pypi.org/project/postfix-sql-ucli
-..
-.. .. |version| image:: https://img.shields.io/badge/test.pypi-v0.0.0-informational?style=flat
-..     :alt: PyPI Package latest release
-..     :target: https://test.pypi.org/project/postfix-sql-ucli
-..
-.. .. |wheel| image:: https://img.shields.io/badge/wheel-yes-success?style=flat
-..     :alt: PyPI Wheel
-..     :target: https://test.pypi.org/project/postfix-sql-ucli
-..
-.. .. |supported-versions| image:: https://img.shields.io/badge/python-3.8_|_3.9_|_3.10_|_3.11-informational?style=flat
-..     :alt: Supported Python versions
-..     :target: https://test.pypi.org/project/postfix-sql-ucli
+.. |license| image:: https://img.shields.io/badge/license-BSD-green?style=flat
+    :alt: PyPI Package license
+    :target: https://test.pypi.org/project/postfix-sql-ucli
 
-.. .. |commits-since| image:: https://img.shields.io/github/commits-since/breezerider/postfix-sql-ucli/v0.0.0.svg
-..     :alt: Commits since latest release
-..     :target: https://github.com/breezerider/postfix-sql-ucli/compare/v0.0.0...main
+.. |version| image:: https://img.shields.io/badge/test.pypi-v0.0.0-informational?style=flat
+    :alt: PyPI Package latest release
+    :target: https://test.pypi.org/project/postfix-sql-ucli
+
+.. |wheel| image:: https://img.shields.io/badge/wheel-yes-success?style=flat
+    :alt: PyPI Wheel
+    :target: https://test.pypi.org/project/postfix-sql-ucli
+
+.. |supported-versions| image:: https://img.shields.io/badge/python-3.8_|_3.9_|_3.10-informational?style=flat
+    :alt: Supported Python versions
+    :target: https://test.pypi.org/project/postfix-sql-ucli
+
+.. |commits-since| image:: https://img.shields.io/github/commits-since/breezerider/postfix-sql-ucli/v0.0.0.svg
+    :alt: Commits since latest release
+    :target: https://github.com/breezerider/postfix-sql-ucli/compare/v0.0.0...main
 
 .. end-badges
 
