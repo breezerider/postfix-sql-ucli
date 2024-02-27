@@ -185,12 +185,11 @@ jobs:
           tox --version
           pip list --format=freeze
       - name: Run tests and collect coverage
-        run: tox -e py310-cover,report -v
+        run: tox -e py310,report -v
       - name: Upload coverage to Codecov
-        env:
-          CODECOV_TOKEN: '${{ secrets.CODECOV_TOKEN }}'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.0.1
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           verbose: true
 
