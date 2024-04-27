@@ -41,6 +41,22 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+# see https://daniel.feldroy.com/posts/2023-08-pypi-project-urls-cheatsheet
+[project.urls]
+
+# Project homepage
+homepage = "https://github.com/breezerider/postfix-sql-ucli"
+
+# The changelog
+changelog = "https://github.com/breezerider/postfix-sql-ucli/blob/master/CHANGELOG.rst"
+
+# Any long form docs
+documentation = "https://postfix-sql-ucli.readthedocs.io/"
+
+# Bugs/issues/feature requests
+issues = "https://github.com/breezerider/postfix-sql-ucli/issues"
+
+
 [tool.black]
 line-length = 120
 target-version = ['py310']
