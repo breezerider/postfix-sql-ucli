@@ -15,6 +15,155 @@ def print_version(ctx, param, value):
     ctx.exit(0)
 
 
+def do_reset(engine, arguments, force):
+    if len(arguments):
+        click.echo("reset operation expects no arguments")
+        sys.exit(1)
+    if not force:
+        confirm = input("Are you sure you want to reset the database? This will delete all data. (yes/no): ")
+        if confirm.lower() != 'yes':
+            print("Reset operation aborted.")
+            return
+    click.echo("Reset Postfix SQL database")
+    operations.reset_database(engine)
+
+
+def add_del_domain(engine, operation, arguments):
+    if len(arguments) != 1:
+        click.echo(f"{operation} operation requires exactly one argument: domain name")
+        sys.exit(1)
+    (domain_name,) = arguments
+    if not utils.is_valid_domain_name(domain_name):
+        click.echo(f"{operation} operation failed: invalid domain name '{domain_name}'")
+        sys.exit(1)
+    if operation == "add-domain":
+        click.echo(f"Adding virtual domain: {domain_name}")
+        domains, added = operations.add_domain(engine, domain_name)
+        if added:
+            click.echo(f"Created new virtual domain: {domains}")
+        else:
+            click.echo(f"Aborted, found exisitng virtual domain(s): {domains}")
+    else:
+        # delete_domain(engine, domain_name)
+        click.echo("delete_domain operation is not implemented")
+
+
+def search_domains(engine, arguments):
+    if len(arguments) > 1:
+        click.echo("search-domains operation expects at most one argument: domain name pattern")
+        sys.exit(1)
+    elif len(arguments) == 1:
+        (domain_name_pattern,) = arguments
+    else:
+        domain_name_pattern = ''
+    click.echo(f"Searching virtual domain names for {domain_name_pattern}")
+    results = operations.search_domains(engine, domain_name_pattern)
+    if len(results):
+        click.echo("Found virtual domain(s): " + ', '.join([str(x) for x in results]))
+    else:
+        click.echo("No virtual domains found")
+
+
+def add_del_user(engine, operation, arguments):
+    if len(arguments) != 1:
+        click.echo(f"{operation} operation requires exactly one argument: user email")
+        sys.exit(1)
+    (user_email,) = arguments
+    if not utils.is_valid_email(user_email):
+        click.echo(f"{operation} operation failed: invalid email address '{user_email}'")
+        sys.exit(1)
+    if operation == "add-user":
+        # get user password
+        if sys.stdin.isatty():
+            # interactive shell, prompt user for a password
+            user_password = utils.get_password()
+        else:
+            # read password from stdin
+            user_password = sys.stdin.readline()
+        click.echo(f"Adding virtual user: {user_email}")
+        users, added = operations.add_user(engine, user_email, user_password)
+        if users is None:
+            _, email_domain = user_email.split('@', 1)
+            click.echo(f"add-user operation failed: domain {email_domain} can not be used")
+            sys.exit(1)
+        if added:
+            click.echo(f"Created new virtual user: {users}")
+        else:
+            click.echo(f"Aborted, found exisitng virtual user(s): {users}")
+    else:
+        click.echo(f"Deleting virtual user account: {user_email}")
+        results = operations.delete_user(engine, user_email)
+        if len(results):
+            click.echo("Deleted virtual user account(s): " + ', '.join([str(x) for x in results]))
+        else:
+            click.echo("No virtual user accounts deleted")
+
+
+def search_users(engine, arguments):
+    if len(arguments) > 1:
+        click.echo("search-users operation expects at most one argument: user email pattern")
+        sys.exit(1)
+    elif len(arguments) == 1:
+        (user_email_pattern,) = arguments
+    else:
+        user_email_pattern = ''
+    click.echo(f"Searching virtual user accounts for {user_email_pattern}")
+    results = operations.search_users(engine, user_email_pattern)
+    if len(results):
+        click.echo("Found virtual user account(s): " + ', '.join([str(x) for x in results]))
+    else:
+        click.echo("No virtual user accounts found")
+
+
+def add_alias(engine, arguments):
+    if len(arguments) != 2:
+        click.echo("add-alias operation requires exactly two arguments: source and destination email addresses")
+        sys.exit(1)
+    source, destination = arguments
+    if not (utils.is_valid_email(source, True) and utils.is_valid_email(destination, True)):
+        click.echo(f"add-alias operation failed: invalid email address in alias '{source}' -> '{destination}'")
+        sys.exit(1)
+
+    click.echo(f"Adding virtual alias: {source} -> {destination}")
+
+    aliases, added = operations.add_alias(engine, source, destination)
+    if aliases is None:
+        _, email_domain = source.split('@', 1)
+        click.echo(f"add-alias operation failed: domain {email_domain} can not be used")
+        sys.exit(1)
+    if added:
+        click.echo(f"Created new virtual alias: {aliases}")
+    else:
+        click.echo(f"Aborted, found exisitng virtual alias(es): {aliases}")
+
+
+def del_search_aliases(engine, operation, arguments):
+    if len(arguments) > 2:
+        click.echo(f"{operation} operation expects at most two arguments: source and destination email patterns")
+        sys.exit(1)
+    elif len(arguments) == 1:
+        source_email_pattern, destination_email_pattern = *arguments, ''
+    elif len(arguments) == 2:
+        source_email_pattern, destination_email_pattern = arguments
+    else:
+        source_email_pattern, destination_email_pattern = '', ''
+
+    if operation == "delete-aliases":
+        click.echo(f"Deleting virtual alias(es): {source_email_pattern} -> {destination_email_pattern}")
+        results = operations.delete_aliases(engine, source_email_pattern, destination_email_pattern)
+        if len(results):
+            click.echo("Deleted virtual alias(es): " + ', '.join([str(x) for x in results]))
+        else:
+            click.echo("No virtual aliases deleted")
+    else:
+        click.echo(f"Searching virtual aliases for {source_email_pattern} -> {destination_email_pattern}")
+        results = operations.search_aliases(engine, source_email_pattern, destination_email_pattern)
+        if len(results):
+            click.echo("Found virtual alias(es): " + ', '.join([str(x) for x in results]))
+        else:
+            click.echo("No virtual aliases found")
+
+
 @click.command()
 @click.argument(
     "operation",
@@ -131,141 +280,19 @@ def main(operation, force, config, verbose, arguments):
 
     # Perform the operation
     if operation == "reset":
-        if len(arguments):
-            click.echo("reset operation expects no arguments")
-            sys.exit(1)
-        if not force:
-            confirm = input("Are you sure you want to reset the database? This will delete all data. (yes/no): ")
-            if confirm.lower() != 'yes':
-                print("Reset operation aborted.")
-                return
-        click.echo("Reset Postfix SQL database")
-        operations.reset_database(engine)
+        do_reset(engine, arguments, force)
     elif operation in ["add-domain", "delete-domain"]:
-        if len(arguments) != 1:
-            click.echo(f"{operation} operation requires exactly one argument: domain name")
-            sys.exit(1)
-        (domain_name,) = arguments
-        if not utils.is_valid_domain_name(domain_name):
-            click.echo(f"{operation} operation failed: invalid domain name '{domain_name}'")
-            sys.exit(1)
-        if operation == "add-domain":
-            click.echo(f"Adding virtual domain: {domain_name}")
-            domains, added = operations.add_domain(engine, domain_name)
-            if added:
-                click.echo(f"Created new virtual domain: {domains}")
-            else:
-                click.echo(f"Aborted, found exisitng virtual domain(s): {domains}")
-        else:
-            # delete_domain(engine, domain_name)
-            click.echo("delete_domain operation is not implemented")
-            pass
+        add_del_domain(engine, operation, arguments)
     elif operation == "search-domains":
-        if len(arguments) > 1:
-            click.echo("search-domains operation expects at most one argument: domain name pattern")
-            sys.exit(1)
-        elif len(arguments) == 1:
-            (domain_name_pattern,) = arguments
-        else:
-            domain_name_pattern = ''
-        click.echo(f"Searching virtual domain names for {domain_name_pattern}")
-        results = operations.search_domains(engine, domain_name_pattern)
-        if len(results):
-            click.echo("Found virtual domain(s): " + ', '.join([str(x) for x in results]))
-        else:
-            click.echo("No virtual domains found")
+        search_domains(engine, arguments)
     elif operation in ["add-user", "delete-user"]:
-        if len(arguments) != 1:
-            click.echo(f"{operation} operation requires exactly one argument: user email")
-            sys.exit(1)
-        (user_email,) = arguments
-        if not utils.is_valid_email(user_email):
-            click.echo(f"{operation} operation failed: invalid email address '{user_email}'")
-            sys.exit(1)
-        if operation == "add-user":
-            # get user password
-            if sys.stdin.isatty():
-                # interactive shell, prompt user for a password
-                user_password = utils.get_password()
-            else:
-                # read password from stdin
-                user_password = sys.stdin.readline()
-            click.echo(f"Adding virtual user: {user_email}")
-            users, added = operations.add_user(engine, user_email, user_password)
-            if users is None:
-                _, email_domain = user_email.split('@', 1)
-                click.echo(f"add-user operation failed: domain {email_domain} can not be used")
-                sys.exit(1)
-            if added:
-                click.echo(f"Created new virtual user: {users}")
-            else:
-                click.echo(f"Aborted, found exisitng virtual user(s): {users}")
-        else:
-            click.echo(f"Deleting virtual user account: {user_email}")
-            results = operations.delete_user(engine, user_email)
-            if len(results):
-                click.echo("Deleted virtual user account(s): " + ', '.join([str(x) for x in results]))
-            else:
-                click.echo("No virtual user accounts deleted")
+        add_del_user(engine, operation, arguments)
     elif operation == "search-users":
-        if len(arguments) > 1:
-            click.echo("search-users operation expects at most one argument: user email pattern")
-            sys.exit(1)
-        elif len(arguments) == 1:
-            (user_email_pattern,) = arguments
-        else:
-            user_email_pattern = ''
-        click.echo(f"Searching virtual user accounts for {user_email_pattern}")
-        results = operations.search_users(engine, user_email_pattern)
-        if len(results):
-            click.echo("Found virtual user account(s): " + ', '.join([str(x) for x in results]))
-        else:
-            click.echo("No virtual user accounts found")
+        search_users(engine, arguments)
     elif operation == "add-alias":
-        if len(arguments) != 2:
-            click.echo("add-alias operation requires exactly two arguments: source and destination email addresses")
-            sys.exit(1)
-        source, destination = arguments
-        if not (utils.is_valid_email(source, True) and utils.is_valid_email(destination, True)):
-            click.echo(f"add-alias operation failed: invalid email address in alias '{source}' -> '{destination}'")
-            sys.exit(1)
-
-        click.echo(f"Adding virtual alias: {source} -> {destination}")
-
-        aliases, added = operations.add_alias(engine, source, destination)
-        if aliases is None:
-            _, email_domain = source.split('@', 1)
-            click.echo(f"add-alias operation failed: domain {email_domain} can not be used")
-            sys.exit(1)
-        if added:
-            click.echo(f"Created new virtual alias: {aliases}")
-        else:
-            click.echo(f"Aborted, found exisitng virtual alias(es): {aliases}")
+        add_alias(engine, arguments)
     elif operation in ["delete-aliases", "search-aliases"]:
-        if len(arguments) > 2:
-            click.echo(f"{operation} operation expects at most two arguments: source and destination email patterns")
-            sys.exit(1)
-        elif len(arguments) == 1:
-            source_email_pattern, destination_email_pattern = *arguments, ''
-        elif len(arguments) == 2:
-            source_email_pattern, destination_email_pattern = arguments
-        else:
-            source_email_pattern, destination_email_pattern = '', ''
-
-        if operation == "delete-aliases":
-            click.echo(f"Deleting virtual alias(es): {source_email_pattern} -> {destination_email_pattern}")
-            results = operations.delete_aliases(engine, source_email_pattern, destination_email_pattern)
-            if len(results):
-                click.echo("Deleted virtual alias(es): " + ', '.join([str(x) for x in results]))
-            else:
-                click.echo("No virtual aliases deleted")
-        else:
-            click.echo(f"Searching virtual aliases for {source_email_pattern} -> {destination_email_pattern}")
-            results = operations.search_aliases(engine, source_email_pattern, destination_email_pattern)
-            if len(results):
-                click.echo("Found virtual alias(es): " + ', '.join([str(x) for x in results]))
-            else:
-                click.echo("No virtual aliases found")
+        del_search_aliases(engine, operation, arguments)
     else:
         # if an operation is in click.Choice above but is not implemented here
         click.echo("unexpected operation, this should never happen")
