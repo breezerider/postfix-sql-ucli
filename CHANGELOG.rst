@@ -2,7 +2,7 @@
 Changelog
 =========
 
-Unreleased
+0.1.1 (2024-04-27)
 ------------------
 
 * Add project URLs.

@@ -33,7 +33,7 @@ Overview
     :alt: PyPI Package license
     :target: https://test.pypi.org/project/postfix-sql-ucli
 
-.. |version| image:: https://img.shields.io/badge/test.pypi-v0.1.0-informational?style=flat
+.. |version| image:: https://img.shields.io/badge/test.pypi-v0.1.1-informational?style=flat
     :alt: PyPI Package latest release
     :target: https://test.pypi.org/project/postfix-sql-ucli
 
@@ -45,9 +45,9 @@ Overview
     :alt: Supported Python versions
     :target: https://test.pypi.org/project/postfix-sql-ucli
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/breezerider/postfix-sql-ucli/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/breezerider/postfix-sql-ucli/v0.1.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/breezerider/postfix-sql-ucli/compare/v0.1.0...main
+    :target: https://github.com/breezerider/postfix-sql-ucli/compare/v0.1.1...main
 
 .. end-badges
 
