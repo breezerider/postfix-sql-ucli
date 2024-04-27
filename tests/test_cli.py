@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from postfix_sql_ucli import __version__, cli, operations
 
 
-@pytest.fixture()
+@pytest.fixture
 def runner():
     return CliRunner()
 
